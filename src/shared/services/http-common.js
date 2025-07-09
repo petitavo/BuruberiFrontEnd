@@ -1,8 +1,8 @@
 // src/shared/services/http-common.js
 import axios from "axios";
 
-const JSON_SERVER_BASE = "http://localhost:3000";
-const BACKEND_ROOT = "http://localhost:5217";
+const JSON_SERVER_BASE = "https://db-buruberi-git-main-angelos-projects-ee7d4e1e.vercel.app";
+const BACKEND_ROOT = "http://20.63.23.166:5217";
 
 // Mapa de rutas que deben ir al backend real y su prefijo correspondiente
 const backendRoutes = {
