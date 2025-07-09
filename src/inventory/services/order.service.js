@@ -4,7 +4,7 @@ import http from "../../shared/services/http-common.js";
 
 export class OrderService {
     // Punto de entrada a tu recurso “orders” en el backend
-    resourceEndpoint = "/orders";
+    resourceEndpoint = "/api/orders";
 
     /**
      * Obtiene todas las órdenes (sin paginación).

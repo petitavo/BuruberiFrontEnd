@@ -5,7 +5,7 @@ import http from "../../shared/services/http-common.js";
 
 export class LoteService {
     // Punto de entrada a tu recurso “lotes” en el backend
-    resourceEndpoint = "/lotes";
+    resourceEndpoint = "/api/lotes";
 
     /**
      * Obtiene todos los lotes (sin paginación).

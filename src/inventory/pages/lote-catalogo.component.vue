@@ -96,6 +96,7 @@ import LoteService from "../services/lote.service.js";
 import ReservaService from "../services/reserva.service.js";
 import FavoritoService from "../services/favorito.service.js";
 import { ReviewService } from "../services/review.service.js";
+import {ReservaEntity} from "../model/reserva.entity.js";
 
 export default {
   props: {
@@ -174,13 +175,18 @@ export default {
       }
       try {
         const hoy = new Date().toISOString().split("T")[0];
-        const reserva = {
+        const reserva = new ReservaEntity({
           idLote: lote.id,
-          idDistribuidor: this.id, // <=== aquí id es string sin conversión
+          idDistribuidor: this.id,
           fechaRegistro: hoy,
           stock: cantidad,
           estado: "pendiente"
-        };
+        });
+
+// Verifica en consola el objeto final (opcional)
+        console.log("Reserva a enviar:", reserva);
+
+        await ReservaService.create(reserva);
         await ReservaService.create(reserva);
         await LoteService.update(lote.id, { ...lote, stock: lote.stock - cantidad });
         this.dialogoReservaVisible = false;

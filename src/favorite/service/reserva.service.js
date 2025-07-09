@@ -4,7 +4,7 @@ import http from "../../shared/services/http-common.js";
 
 export class ReservaService {
     // Punto de entrada a tu recurso “reservas” en el backend
-    resourceEndpoint = "/reservas";
+    resourceEndpoint = "/api/reservas";
 
     /**
      * Obtiene todas las reservas (sin paginación).

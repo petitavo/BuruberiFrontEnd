@@ -10,7 +10,9 @@ const backendRoutes = {
     "/auth": "/auth",
     "/iam": "/iam",
     "/api/lotes": "/inventory",
-    "/api/mensajes": "/communication"
+    "/api/mensajes": "/communication",
+    "/api/reservas": "/inventory",
+    "/api/v1/review": "/review",
 };
 
 
