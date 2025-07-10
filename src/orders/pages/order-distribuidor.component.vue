@@ -12,12 +12,14 @@
             {{ formatFecha(slotProps.data.fechaPedido) }}
           </template>
         </pv-column>
-        <pv-column field="cantidad" header="Cantidad" />
-        <pv-column field="precioFinal" header="Precio Final">
+
+        <!-- ✅ Mostramos la cantidad directamente como Precio Final -->
+        <pv-column field="cantidad" header="Precio Final">
           <template #body="slotProps">
-            S/ {{ slotProps.data.precioFinal?.toFixed(2) }}
+            S/ {{ slotProps.data.cantidad?.toFixed(2) }}
           </template>
         </pv-column>
+
         <pv-column field="estado" header="Estado" />
         <pv-column header="Acción" :exportable="false">
           <template #body="slotProps">
@@ -31,14 +33,12 @@
                          @click="pagarOrden(slotProps.data)" />
             </div>
 
-            <!-- Input del código promocional -->
             <div v-if="ordenConPromo && ordenConPromo.id === slotProps.data.id" class="promo-box mt-2">
               <pv-input-text v-model="codigoPromo" placeholder="Ingrese código" class="mr-2" />
               <pv-button label="Aplicar" class="p-button-sm" @click="aplicarPromo(slotProps.data)" />
               <button class="cerrar-btn" @click="cerrarPromo">✖</button>
             </div>
 
-            <!-- PayPal -->
             <div v-if="ordenSeleccionada && ordenSeleccionada.id === slotProps.data.id" class="paypal-box">
               <button class="cerrar-btn" @click="cerrarPaypal">✖</button>
               <div :id="`paypal-button-container-${slotProps.data.id}`" class="mt-2"></div>
@@ -52,7 +52,6 @@
 
 <script>
 import OrderService from "../services/order.service.js";
-import LoteService from "../services/lote.service.js";
 import PromotionService from "../services/promotion.service.js";
 
 export default {
@@ -69,7 +68,14 @@ export default {
     async fetchOrdenesDistribuidor(idDistribuidor) {
       try {
         const response = await OrderService.findByDistribuidor(idDistribuidor);
-        this.ordenes = response.data;
+
+        // ✅ Aplicamos la multiplicación directa por 150
+        const ordenesCalculadas = response.data.map(orden => ({
+          ...orden,
+          cantidad: +(orden.cantidad * 150).toFixed(2)
+        }));
+
+        this.ordenes = ordenesCalculadas;
       } catch (error) {
         console.error("Error al obtener órdenes del distribuidor:", error);
       }
@@ -100,7 +106,7 @@ export default {
         paypal.Buttons({
           createOrder: function (data, actions) {
             return actions.order.create({
-              purchase_units: [{ amount: { value: orden.precioFinal?.toFixed(2) || '0.00' } }]
+              purchase_units: [{ amount: { value: orden.cantidad?.toFixed(2) || '0.00' } }]
             });
           },
           onApprove: async (data, actions) => {
@@ -138,27 +144,19 @@ export default {
         if (!promociones.length) return alert("❌ Código no válido");
 
         const promo = promociones[0];
-
-        const loteResponse = await LoteService.getById(orden.idLote);
-        const lote = loteResponse.data;
-
-        if (promo.IdProductor.toString() !== lote.idProductor.toString()) {
-          return alert("❌ El código no pertenece al productor del lote");
-        }
-
         const descuentoDecimal = promo.descuento / 100;
-        const precioOriginal = orden.precioFinal;
+        const precioOriginal = orden.cantidad;
         const nuevoPrecio = +(precioOriginal * (1 - descuentoDecimal)).toFixed(2);
 
         const ordenActualizada = {
           ...orden,
-          precioFinal: nuevoPrecio,
+          cantidad: nuevoPrecio,
           codigoPromoAplicado: true,
         };
 
         await OrderService.update(orden.id, ordenActualizada);
 
-        orden.precioFinal = nuevoPrecio;
+        orden.cantidad = nuevoPrecio;
         orden.codigoPromoAplicado = true;
 
         alert(`✅ Código aplicado. Nuevo precio: S/ ${nuevoPrecio}`);
